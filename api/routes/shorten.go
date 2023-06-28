@@ -9,6 +9,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -64,6 +65,39 @@ func ShortenURL(c *fiber.Ctx) error {
 
 	// Enfore HTTPS
 	body.URL = helpers.EnforeHTTP(body.URL)
+
+	/*
+		Writing the shortening logic
+		We need to check if the user has sent a customURL according to this desire
+		If he has we need to check if the customURL already exist previously for some other URL
+		If not we need to assign a new short URL as per the customURL
+	*/
+	var id string
+
+	if body.CustomShort == "" {
+		id = uuid.New().String()[:6]
+	} else {
+		id = body.CustomShort
+	}
+
+	r := database.CreateClient(0)
+	defer r.Close()
+
+	// Check if the customeURL is already present in the database or not
+	val, _ := r.Get(database.Ctx, id).Result()
+	if val != "" {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "CustomeShort URL already exists"})
+	}
+
+	if body.Expiry == 0 {
+		body.Expiry = 24
+	}
+
+	err = r.Set(database.Ctx, id, body.URL, body.Expiry*3600*time.Second).Err()
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Unable to connect to server"})
+	}
 
 	// decrement the count by 1
 	r2.Decr(database.Ctx, c.IP())
