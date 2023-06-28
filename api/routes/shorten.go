@@ -36,5 +36,11 @@ func ShortenURL(c *fiber.Ctx) error {
 	}
 
 	// Check if the URL is a domain URL
+	if !helpers.RemoveDomainError(body.URL) {
+		return c.Status(fiber.StatusServiceUnavailable).JSON(fiber.Map{"error": "Can't use that URL 😎"})
+	}
 
+	// Enfore HTTPS
+	body.URL = helpers.EnforeHTTP(body.URL)
+	return nil
 }
