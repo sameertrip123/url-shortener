@@ -12,18 +12,34 @@ This is a custom URL shortener project built using Go and the Fiber web framewor
 
 ## Technologies Used
 
-- Go programming language
+- Go
 - Fiber web framework
-- Redis database
+- Redis
 
 ## Getting Started
 
 ### Prerequisites
 
 - Go (version 1.20)
+- Fiber (version v2)
 - Redis (version v9)
 
+### Installation
 
+1. Clone the repository:
+
+```bash
+git clone https://github.com/sameertrip123/url-shortener.git
+```
+
+2. Go to the main.go file
+```bash
+cd api
+```
+3. Run the main.go file
+```bash
+go run main.go
+```   
 
 ## Usage
 
